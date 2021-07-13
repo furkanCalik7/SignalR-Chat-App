@@ -34,7 +34,9 @@ export default {
   },
   mounted() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:5001/chatHub")
+      .withUrl("https://localhost:5001/chatHub", {
+        accessTokenFactory: () => "TToken",
+      })
       .build();
 
     this.connection.on("receiveMessage", (message) => {
