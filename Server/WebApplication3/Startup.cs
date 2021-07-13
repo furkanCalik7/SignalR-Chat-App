@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -38,8 +39,22 @@ namespace WebApplication3
 
             services.AddSingleton<ChatDatabase>();
 
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options => {
+
+                options.Events = new JwtBearerEvents { 
+                    OnMessageReceived = context => {
+                        Console.WriteLine(context.Request.Query["access-token"]) ;
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+
             services.AddSignalR();
-            services.AddRazorPages();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
