@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApplication3.Hubs;
+using WebApplication3.Identity;
 using WebApplication3.Repository;
 
 namespace WebApplication3
@@ -23,6 +24,7 @@ namespace WebApplication3
         }
 
         public IConfiguration Configuration { get; }
+        public int UserIdProvider { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -38,7 +40,7 @@ namespace WebApplication3
                 //sp.GetRequiredService<IOptions<ChatDatabaseSettings>>().Value);
 
             services.AddSingleton<ChatDatabase>();
-
+/*
             services.AddAuthentication(options => {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -46,15 +48,18 @@ namespace WebApplication3
 
                 options.Events = new JwtBearerEvents { 
                     OnMessageReceived = context => {
-                        Console.WriteLine(context.Request.Query["access-token"]) ;
-                        return Task.CompletedTask;
+
+                        Console.WriteLine(context.Request.Query["access_token"]) ;
+   
+                        
                     }
                 };
-            });
+            });*/
 
 
             services.AddSignalR();
 
+            services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,17 +76,16 @@ namespace WebApplication3
                 app.UseHsts();
             }
 
-        //    app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
             
             app.UseCors();
             app.UseRouting();
 
-            app.UseAuthorization();
+           /* app.UseAuthentication();*/
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapRazorPages();
                 endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
