@@ -6,12 +6,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using WebApplication3.Controller;
 using WebApplication3.Hubs;
-using WebApplication3.Identity;
+using WebApplication3.JwtTokenAuthentication;
 using WebApplication3.Repository;
 
 namespace WebApplication3
@@ -24,9 +27,7 @@ namespace WebApplication3
         }
 
         public IConfiguration Configuration { get; }
-        public int UserIdProvider { get; private set; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors(options => options.AddDefaultPolicy(policy => {
@@ -34,32 +35,30 @@ namespace WebApplication3
                 }));
             
             services.Configure<IChatDatabaseSettings>(Configuration.GetSection(nameof(ChatDatabaseSettings)));
-           
-                    //Look here
-                //    services.AddSingleton<IChatDatabaseSettings>(sp =>
-                //sp.GetRequiredService<IOptions<ChatDatabaseSettings>>().Value);
+            string key = "keykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykey";
 
+            // TODO: Add mongoDB singleton
+            //    services.AddSingleton<IChatDatabaseSettings>(sp =>
+            //sp.GetRequiredService<IOptions<ChatDatabaseSettings>>().Value);
             services.AddSingleton<ChatDatabase>();
-/*
+
+            services.AddSingleton<IJwtTokenAuthenticationManager>(new JwtTokenAuthenticationManager(key));
+            services.AddControllers();
+
             services.AddAuthentication(options => {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options => {
-
-                options.Events = new JwtBearerEvents { 
-                    OnMessageReceived = context => {
-
-                        Console.WriteLine(context.Request.Query["access_token"]) ;
-   
-                        
-                    }
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
+                    ValidateIssuer = false ,
+                    ValidateAudience = false
                 };
-            });*/
-
-
+            });
             services.AddSignalR();
-
-            services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,10 +81,14 @@ namespace WebApplication3
             app.UseCors();
             app.UseRouting();
 
-           /* app.UseAuthentication();*/
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapHub<ChatHub>("/chatHub");
             });
         }

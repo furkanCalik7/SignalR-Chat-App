@@ -8,7 +8,7 @@ using WebApplication3.Repository;
 using WebApplication3.Utils;
 
 namespace WebApplication3.Hubs {
-    
+    [Authorize]
     public class ChatHub: Hub<IChatClient> {
 
         public readonly ChatDatabase chatDB;
@@ -25,9 +25,6 @@ namespace WebApplication3.Hubs {
 
         public override async Task OnConnectedAsync() {
             Console.WriteLine("New client is connected");
-
-            Console.WriteLine(Context.User.Identity.IsAuthenticated);
-            Console.WriteLine("Name is " + Context.User.Identity.Name);
             await base.OnConnectedAsync();
         }
 
