@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using WebApplication3.Repository;
 using WebApplication3.Utils;
 
 namespace WebApplication3.Hubs {
+    [Authorize]
     public class ChatHub: Hub<IChatClient> {
 
         public readonly ChatDatabase chatDB;
@@ -18,12 +20,12 @@ namespace WebApplication3.Hubs {
         public async Task SendMessage(string user, string message, string room) {
             Message messageJson = new Message(user, room, message);
             messageJson = chatDB.CreateNewMessage(messageJson);
-           // await Clients.Group(room).SendAsync("receiveMessage", messageJson);
             await Clients.Group(room).receiveMessage(messageJson);
         }
 
         public override async Task OnConnectedAsync() {
             Console.WriteLine("New client is connected");
+            Console.WriteLine(Context.User.Identity.IsAuthenticated);
             await base.OnConnectedAsync();
         }
 
@@ -31,25 +33,22 @@ namespace WebApplication3.Hubs {
             Console.WriteLine("ManifestNewUser() called");
             string message = username + " jumped to the chat.";
             Message messageJson = chatDB.CreateNewMessage(new Message("Chat Bot", room, message));
-        //    await Clients.Group(room).SendAsync("receiveMessage", messageJson);
             await Clients.Group(room).receiveMessage(messageJson);
         }
 
         public override Task OnDisconnectedAsync(Exception exception) {
             Console.WriteLine("A client disconnected");
             return base.OnDisconnectedAsync(exception);
-
         }
 
         public async Task GetUsers(string room) {
-         //    await Clients.Group(room).SendAsync("updateUsers", chatDB.GetUsers(room)); 
+        
             await Clients.Group(room).updateUsers(chatDB.GetUsers(room));
         }
         public async Task CreateUser(string username, string room) {
             ChatUser user = new ChatUser(username,room);
             chatDB.CreateUser(user);
             await Groups.AddToGroupAsync(Context.ConnectionId, room);
-         //   await Clients.Group(room).SendAsync("updateUsers", chatDB.GetUsers(room));
             await Clients.Group(room).updateUsers(chatDB.GetUsers(room));
         }
 
@@ -57,10 +56,8 @@ namespace WebApplication3.Hubs {
             chatDB.RemoveUser(username, room);
             Message messageJson = chatDB.CreateNewMessage(new Message("Chat Bot", room, username + " left the chat."));
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, room);
-         // await Clients.Group(room).SendAsync("updateUsers", chatDB.GetUsers(room));
             await Clients.Group(room).updateUsers(chatDB.GetUsers(room));
-          // await Clients.Group(room).SendAsync("receiveMessage", messageJson);
-           await Clients.Group(room).receiveMessage(messageJson);
+            await Clients.Group(room).receiveMessage(messageJson);
         }
     }
 }

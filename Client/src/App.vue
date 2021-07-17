@@ -1,10 +1,22 @@
 <template>
   <body>
-    <router-view></router-view>
+    <router-view @token="SendToken" :model="accessToken"></router-view>
   </body>
 </template>
 
 <script>
+export default {
+  methods: {
+    SendToken(token) {
+      this.accessToken = token;
+    },
+  },
+  data() {
+    return {
+      accessToken: "",
+    };
+  },
+};
 </script>
 
 <style>
@@ -158,7 +170,7 @@ a {
 }
 
 .join-main p {
-  margin-bottom: 20px;
+  margin-top: 20px;
 }
 
 .join-main .form-control {
@@ -170,7 +182,7 @@ a {
   margin-bottom: 5px;
 }
 
-.join-main input[type="text"] {
+.join-main input {
   font-size: 16px;
   padding: 5px;
   height: 40px;
