@@ -1,7 +1,7 @@
 # Chat Application Prototype
 
 ## Technologies:
-1. Asp.net Core
+*. Asp.net Core
 2. SignalR
 3. Vue.js
 4. JWT authentication
