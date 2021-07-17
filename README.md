@@ -1,4 +1,4 @@
-# Chat application prototype
+# Chat Application Prototype
 
 ## Technologies:
 1. Asp.net Core
