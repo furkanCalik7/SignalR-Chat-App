@@ -23,6 +23,7 @@ export default {
     UserList,
     MessagePanel,
   },
+  props: ["model"],
   data() {
     return {
       userList: [],
@@ -33,9 +34,11 @@ export default {
     };
   },
   mounted() {
+    console.log("Token is:" + this.model);
+
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl("https://localhost:5001/chatHub", {
-        accessTokenFactory: () => "TToken",
+        accessTokenFactory: () => this.model,
       })
       .build();
 
