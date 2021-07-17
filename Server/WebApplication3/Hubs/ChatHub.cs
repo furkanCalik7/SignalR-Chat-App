@@ -25,6 +25,7 @@ namespace WebApplication3.Hubs {
 
         public override async Task OnConnectedAsync() {
             Console.WriteLine("New client is connected");
+            Console.WriteLine(Context.User.Identity.IsAuthenticated);
             await base.OnConnectedAsync();
         }
 

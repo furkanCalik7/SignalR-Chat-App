@@ -40,6 +40,7 @@ namespace WebApplication3
             // TODO: Add mongoDB singleton
             //    services.AddSingleton<IChatDatabaseSettings>(sp =>
             //sp.GetRequiredService<IOptions<ChatDatabaseSettings>>().Value);
+
             services.AddSingleton<ChatDatabase>();
 
             services.AddSingleton<IJwtTokenAuthenticationManager>(new JwtTokenAuthenticationManager(key));

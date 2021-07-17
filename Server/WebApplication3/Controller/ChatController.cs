@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +37,8 @@ namespace WebApplication3.Controller {
             }
             Console.WriteLine("Username: " + userInfo.username + " - password: " + userInfo.password);
             Console.WriteLine("Token:" + token);
-            return Ok(token);
+            string json = JsonConvert.SerializeObject(token);
+            return Ok(json);
         }
     }
 }
